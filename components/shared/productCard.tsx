@@ -26,7 +26,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
     prices,
 }) => {
     const [isHovered, setIsHovered] = useState(false);
-    console.log(`Rendering ProductCard for ${discount} and id ${name}`);
+    // console.log(`Rendering ProductCard for ${discount} and id ${name}`);
 
 
     return (
@@ -63,7 +63,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                     </h3>
 
                     <div className="space-y-2">
-                        {prices.map((price, index) => (
+                        {prices?.map((price, index) => (
                             <div key={index} className="flex justify-between items-center">
                                 <span className="text-white/80 text-sm">{price.weight}</span>
                                 <span className="text-green-400 font-bold">${price.amount}</span>

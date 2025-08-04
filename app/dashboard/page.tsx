@@ -39,51 +39,6 @@ const AddProductForm = () => {
             photos,
             videos,
         });
-
-        const addNewProduct = async () => {
-            try {
-                const response = await fetch('http://localhost:5000/api/products', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        name: productName,
-                        description,
-                        category,
-                        type,
-                        priceOptions: priceList.map(item => ({
-                            price: Number(item.price),
-                            unit: item.unit
-                        })),
-                        photoUrls: photos.map(file => URL.createObjectURL(file)),
-                        videoUrls: videos.map(file => URL.createObjectURL(file))
-                    }),
-                });
-                
-                const data = await response.json();
-
-                // console.log(data)
-
-                // if (response.ok) {
-                //     console.log('Product added successfully:', data);
-                //     // Reset form fields
-                //     setProductName('');
-                //     setDescription('');
-                //     setCategory('');
-                //     setType('');
-                //     setPriceList([]);
-                //     setPhotos([]);
-                //     setVideos([]);
-                // } else {
-                //     console.error('Error adding product:', data);
-                // }
-            }
-            catch (error) {
-                console.error('Error:', error);
-            }
-        }
-        addNewProduct()
     };
 
     const handleAddPriceUnit = () => {

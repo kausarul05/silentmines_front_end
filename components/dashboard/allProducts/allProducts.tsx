@@ -12,6 +12,7 @@ import { Select } from "@radix-ui/react-select";
 import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Product } from "@/app/(home)/_components/DealOfTheWeek";
+import { getAllProducts } from "@/components/features/products";
 
 // const defaultProducts = [
 //     {
@@ -79,44 +80,19 @@ const AllProducts = () => {
     const [unitInput, setUnitInput] = useState('');
     const [priceList, setPriceList] = useState<{ price: string; unit: string }[]>([]);
 
-
-    // API Call Function
-    const fetchProducts = async () => {
-        try {
-            const response = await fetch("http://localhost:5000/api/products");
-            const data = await response.json();
-
-            const formattedProducts: Product[] = data.data.map((item: any, index: number) => ({
-                id: item._id,
-                image: item.photoUrls[0], // Taking first image
-                discount: Math.floor(Math.random() * 80) + 10, // Dummy discount
-                category: item.category,
-                subcategory: item.type || 'Specials', // fallback if 'type' not present
-                name: item.name,
-                priceOptions: item.priceOptions.length > 0
-                    ? item.priceOptions.map((option: any) => ({
-                        unit: option.unit,
-                        amount: option.price.toString()
-                    }))
-                    : [
-                        { unit: "1 LB", amount: "100" }, // Fallback dummy price
-                        { unit: "2 LB", amount: "180" }
-                    ]
-            }));
-
-            setProducts(formattedProducts);
-            // setLoading(false);
-        } catch (error) {
-            console.error("Failed to fetch products:", error);
-            // setLoading(false);
-        }
-    };
-
+    // Fetch products on component mount
     useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const productsData = await getAllProducts();
+                setProducts(productsData);
+            } catch (error) {
+                console.error("Error loading products:", error);
+            }
+        };
+
         fetchProducts();
     }, []);
-
-    console.log("products", products)
 
     const handleDelete = (product: any) => {
         setSelectedProduct(product);
@@ -138,27 +114,6 @@ const AllProducts = () => {
         setSelectedProduct(product);
         setEditModal(true);
     };
-
-    const handleSaveUpdate = () => {
-        const updateProducts = async () => {
-            try {
-                const response = await fetch(`http://localhost:5000/api/products/${selectedProduct.id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(selectedProduct),
-                })
-
-                const data = await response.json();
-                console.log("Product updated:", data);
-            }catch (error) {
-                console.error("Failed to update product:", error);
-            } 
-        }
-        updateProducts();
-        setEditModal(false);
-    }
 
     const confirmDelete = () => {
         setProducts(products.filter((p: any) => p.id !== selectedProduct.id));
@@ -336,7 +291,6 @@ const AllProducts = () => {
                                 <Button
                                     className="bg-green-600 hover:bg-green-700 text-white"
                                     type="submit"
-                                    onClick={() => handleSaveUpdate()}
                                 >
                                     Save
                                 </Button>
