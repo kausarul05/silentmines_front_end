@@ -35,3 +35,25 @@ export const getAllProducts = async () => {
         throw error;
     }
 };
+
+export const addProduct = async (product : any) => {
+    try {
+        const response = await fetch("http://localhost:5000/api/products", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(product),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to create product");
+        }
+
+        const resData = await response.json();
+        return resData;
+    } catch (error) {
+        console.error("Error creating product:", error);
+        throw error;
+    }
+}

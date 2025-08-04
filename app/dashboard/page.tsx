@@ -16,40 +16,113 @@ import {
 import Header from '@/components/dashboard/header/header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AllProducts from '@/components/dashboard/allProducts/allProducts';
+import { addProduct } from '@/components/features/products';
+
+interface AddProduct {
+    name: string;
+    description: string;
+    category: string;
+    type: string;
+    priceOptions: { price: string; unit: string }[];
+    photoUrls: File[];
+    videoUrls: File[];
+}
 
 const AddProductForm = () => {
-    const [productName, setProductName] = useState('');
+    const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState('');
     const [type, setType] = useState('');
     const [priceInput, setPriceInput] = useState('');
     const [unitInput, setUnitInput] = useState('');
-    const [priceList, setPriceList] = useState<{ price: string; unit: string }[]>([]);
-    const [photos, setPhotos] = useState<File[]>([]);
-    const [videos, setVideos] = useState<File[]>([]);
+    const [priceOptions, setPriceOptions] = useState<{ price: string; unit: string }[]>([]);
+    const [photoUrls, setPhotoUrls] = useState<File[]>([]);
+    const [videoUrls, setVideoUrls] = useState<File[]>([]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    // const handleSubmit = async (e: React.FormEvent) => {
+    //     e.preventDefault();
+    //     // console.log({
+    //     //     name,
+    //     //     description,
+    //     //     category,
+    //     //     type,
+    //     //     priceOptions,
+    //     //     photoUrls,
+    //     //     videoUrls,
+    //     // });
+
+    //     const product = {
+    //         name,
+    //         description,
+    //         category,
+    //         type,
+    //         priceOptions: JSON.stringify(priceOptions.map(item => ({
+    //             unit: item.unit,
+    //             price: Number(item.price),
+    //         }))),
+    //         photoUrls: ["https://dummyimage.com/600x400/000/fff"],
+    //         videoUrls: ["https://dummyimage.com/600x400/000/fff"],
+    //     };
+    //     console.log(product)
+    //     try {
+    //         const productsData = await addProduct(product);
+    //         console.log("Product added successfully:", productsData);
+    //     } catch (error) {
+    //         console.error("Error creating products:", error);
+    //     }
+
+    // };
+
+    const handleSubmit = async (e : any) => {
         e.preventDefault();
-        console.log({
-            productName,
-            description,
-            category,
-            type,
-            priceList,
-            photos,
-            videos,
+
+        const formData = new FormData();
+        formData.append("name", name.trim());
+        formData.append("description", description.trim());
+        formData.append("category", category.trim());
+        formData.append("type", type.trim());
+        formData.append("priceOptions", JSON.stringify(priceOptions.map(item => ({
+            unit: item.unit,
+            price: Number(item.price),
+        }))));
+
+        // Append multiple photos
+        photoUrls.forEach((file) => {
+            formData.append("photos", file);
         });
+
+        // Append multiple videos
+        videoUrls.forEach((file) => {
+            formData.append("videos", file);
+        });
+
+        try {
+            const res = await fetch("http://localhost:5000/api/products", {
+                method: "POST",
+                body: JSON.stringify({formData}),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                console.log("Product created successfully:", data);
+            } else {
+                console.error("Error:", data.error);
+            }
+        } catch (err) {
+            console.error("❌ Submit error:", err);
+        }
     };
 
     const handleAddPriceUnit = () => {
         if (!priceInput || !unitInput) return;
-        setPriceList([...priceList, { price: priceInput, unit: unitInput }]);
+        setPriceOptions([...priceOptions, { price: priceInput, unit: unitInput }]);
         setPriceInput('');
         setUnitInput('');
     };
 
     const handleDeletePriceUnit = (index: number) => {
-        setPriceList(priceList.filter((_, i) => i !== index));
+        setPriceOptions(priceOptions.filter((_, i) => i !== index));
     };
 
     const handleFileChange = (
@@ -59,8 +132,8 @@ const AddProductForm = () => {
         if (!files) return;
         const fileArray = Array.from(files);
         type === 'photo'
-            ? setPhotos([...photos, ...fileArray])
-            : setVideos([...videos, ...fileArray]);
+            ? setPhotoUrls([...photoUrls, ...fileArray])
+            : setVideoUrls([...videoUrls, ...fileArray]);
     };
 
     return (
@@ -90,8 +163,8 @@ const AddProductForm = () => {
                             <Label>Name</Label>
                             <Input
                                 placeholder="Product Name"
-                                value={productName}
-                                onChange={(e) => setProductName(e.target.value)}
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
                                 className="bg-[#1a2a1a] mt-3 text-white"
                             />
                         </div>
@@ -181,11 +254,11 @@ const AddProductForm = () => {
                             </div>
                         </div>
 
-                        {priceList.length > 0 && (
+                        {priceOptions.length > 0 && (
                             <div className="space-y-3">
                                 <Label className="text-sm text-white">Price Options</Label>
                                 <div className="space-y-2">
-                                    {priceList.map((item, index) => (
+                                    {priceOptions.map((item, index) => (
                                         <div
                                             key={index}
                                             className="flex items-center justify-between bg-[#1a2a1a] border border-white/10 rounded-lg p-3 shadow-sm"
@@ -211,7 +284,7 @@ const AddProductForm = () => {
 
                         <div className='flex gap-3'>
                             <div className="flex-1">
-                                <Label>Upload Photos</Label>
+                                <Label>Upload photoUrls</Label>
                                 <Input
                                     className='bg-[#1a2a1a] mt-3'
                                     type="file"
@@ -220,14 +293,14 @@ const AddProductForm = () => {
                                     onChange={(e) => handleFileChange(e.target.files, 'photo')}
                                 />
                                 <div className="flex flex-wrap gap-3">
-                                    {photos.map((file, idx) => (
+                                    {photoUrls.map((file, idx) => (
                                         <div key={idx} className="relative w-20 h-20">
                                             <img
                                                 src={URL.createObjectURL(file)}
                                                 className="rounded object-cover w-full h-full"
                                             />
                                             <button
-                                                onClick={() => setPhotos(photos.filter((_, i) => i !== idx))}
+                                                onClick={() => setPhotoUrls(photoUrls.filter((_, i) => i !== idx))}
                                                 className="absolute top-0 right-0 bg-black/60 hover:bg-red-600 rounded-full p-1"
                                             >
                                                 <X className="w-4 h-4 text-white" />
@@ -238,7 +311,7 @@ const AddProductForm = () => {
                             </div>
 
                             <div className="flex-1">
-                                <Label>Upload Videos</Label>
+                                <Label>Upload videoUrls</Label>
                                 <Input
                                     className='bg-[#1a2a1a] mt-3'
                                     type="file"
@@ -247,7 +320,7 @@ const AddProductForm = () => {
                                     onChange={(e) => handleFileChange(e.target.files, 'video')}
                                 />
                                 <div className="flex flex-wrap gap-3">
-                                    {videos.map((file, idx) => (
+                                    {videoUrls.map((file, idx) => (
                                         <div key={idx} className="relative w-24 h-20">
                                             <video
                                                 src={URL.createObjectURL(file)}
@@ -255,7 +328,7 @@ const AddProductForm = () => {
                                                 className="rounded w-full h-full object-cover"
                                             />
                                             <button
-                                                onClick={() => setVideos(videos.filter((_, i) => i !== idx))}
+                                                onClick={() => setVideoUrls(videoUrls.filter((_, i) => i !== idx))}
                                                 className="absolute top-0 right-0 bg-black/60 hover:bg-red-600 rounded-full p-1"
                                             >
                                                 <X className="w-4 h-4 text-white" />

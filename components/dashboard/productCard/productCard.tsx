@@ -24,7 +24,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
     prices,
 }) => {
     const [isHovered, setIsHovered] = useState(false);
-    console.log(image, name, discount, category, subcategory, prices);
+    // console.log(image, name, discount, category, subcategory, prices);
     return (
         <Card
             className=" pt-0 backdrop-blur-sm border border-white/10 overflow-hidden bg-green-600/5 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-green-500/50 group flex flex-col" // 🧠 Make Card flex container
