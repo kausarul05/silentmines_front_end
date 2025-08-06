@@ -67,7 +67,6 @@ const AddProductForm = () => {
 
         try {
             const res = await addProduct(formData);
-            console.log("res", res)
             if (res._id) {
                 setName('');
                 setDescription('');

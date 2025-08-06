@@ -13,6 +13,7 @@ import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/compone
 import { Textarea } from "@/components/ui/textarea";
 import { Product } from "@/app/(home)/_components/DealOfTheWeek";
 import { deleteProduct, getAllProducts, updateProduct } from "@/components/features/products";
+import { toast } from "sonner";
 
 
 const AllProducts = () => {
@@ -39,7 +40,6 @@ const AllProducts = () => {
     }, []);
 
     const handleUpdateProduct = async (product: any) => {
-        console.log("Updating product:", product.subcategory);
 
         const formData = new FormData();
 
@@ -47,15 +47,17 @@ const AllProducts = () => {
         formData.append("description", product.description.trim());
         formData.append("category", product.category.trim());
         formData.append("type", product.subcategory.trim());
-        formData.append("priceOptions", JSON.stringify(product.prices.map((item : any) => ({
+        formData.append("priceOptions", JSON.stringify(product.prices.map((item: any) => ({
             unit: item.weight,
             price: Number(item.amount),
         }))));
 
-        await updateProduct(product.id, formData);
-        // console.log(resData)
+        // Update API Call
+        const resData = await updateProduct(product.id, formData);
+        if (resData._id) {
+            toast.success("Product updated successfully!");
+        }
     };
-
 
     const handleDelete = (product: any) => {
         setSelectedProduct(product);
@@ -81,6 +83,12 @@ const AllProducts = () => {
 
     const confirmDelete = async () => {
         const response = await deleteProduct(selectedProduct.id);
+        if (!response) {
+            toast.error("Failed to delete product");
+            return;
+        }
+        toast.success("Product deleted successfully!");
+        // Remove product from state
         setProducts(products.filter((p: any) => p.id !== selectedProduct.id));
         setDeleteModal(false);
         // console.log(response)
@@ -103,7 +111,6 @@ const AllProducts = () => {
                     </div>
                 )
             ))}
-
 
             {/* Delete Confirmation Modal */}
             <DeleteProductModal
@@ -145,7 +152,7 @@ const AllProducts = () => {
 
                             <div>
                                 <Label>Category</Label>
-                                <Select value={selectedProduct.category ?? ""}
+                                <Select value={selectedProduct?.category}
                                     onValueChange={(value) => setSelectedProduct({ ...selectedProduct, category: value })}>
                                     <SelectTrigger className="bg-[#1a1a1a] mt-3 w-full text-white">
                                         <SelectValue placeholder="Select Category" />
