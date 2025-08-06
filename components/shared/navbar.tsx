@@ -2,9 +2,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, Search, X } from 'lucide-react';
 import { Button } from '../ui/button';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import OrderPopup from '@/app/(home)/_components/OrderForm';
+import { getProductBySearch } from '../features/products';
 
 interface SearchSuggestion {
   id: string;
@@ -34,19 +35,11 @@ const Navbar = () => {
   const [mobileSubMenuOpen, setMobileSubMenuOpen] = useState<string | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const dropdownTimeoutRef = useRef<NodeJS.Timeout>(null);
+  const router = useRouter();
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
-
-  // Mock search suggestions - replace with your actual search logic
-  const mockSuggestions: SearchSuggestion[] = [
-    { id: '1', title: 'Flowers', category: 'Flowers', url: '/flowers' },
-    { id: '2', title: 'Exotic Plants Collection', category: 'Licensed Exotics', url: '/exotics/plants' },
-    { id: '3', title: 'Organic Fertilizer', category: 'Soil Exotics', url: '/soil/fertilizer' },
-    { id: '4', title: 'Indoor Grow Lights', category: 'Licensed Indoors', url: '/indoors/grow-lights' },
-    { id: '5', title: 'Wax Melts', category: 'Wax', url: '/wax/melts' },
-    { id: '6', title: 'AAA Grade Seeds', category: 'Licensed AAA', url: '/aaa/seeds' },
-    { id: '7', title: 'Last Chance Clearance', category: 'Deals', url: '/deals/clearance' },
-  ];
-
+  
   const navItems: NavItem[] = [
     { name: 'Home', href: '/' },
     { name: 'Gallery', href: '/gallery' },
@@ -104,19 +97,36 @@ const Navbar = () => {
     }, 150);
   };
 
-  // Filter suggestions based on search query
   useEffect(() => {
-    if (searchQuery.trim()) {
-      const filtered = mockSuggestions.filter(
-        (item) =>
-          item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.category.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setSuggestions(filtered);
-    } else {
-      setSuggestions([]);
-    }
-  }, [searchQuery]);
+    const fetchSuggestions = async () => {
+      if (searchQuery.trim() === '') {
+        setSuggestions([]);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const res = await getProductBySearch(searchQuery, page);
+        const formattedSuggestions: SearchSuggestion[] = res.map((item: any) => ({
+          id: item.id,
+          title: item.name,
+          category: item.category,
+          url: `/product/${item.id}`,
+        }));
+
+        setSuggestions(formattedSuggestions);
+      } catch (error) {
+        console.error("Error fetching search suggestions:", error);
+        setSuggestions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(fetchSuggestions, 300); // debounce to reduce API hits
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery, page]);
+
 
   // Close search when clicking outside
   useEffect(() => {
@@ -156,6 +166,7 @@ const Navbar = () => {
     setSearchQuery('');
     setIsSearchOpen(false);
     // Handle navigation here
+    router.push(suggestion.url);
   };
 
 
@@ -398,7 +409,11 @@ const Navbar = () => {
             </div>
 
             {/* Search Suggestions */}
-            {suggestions.length > 0 && (
+            {loading ? (
+              <div className="p-4 text-center text-gray-500 animate-in fade-in duration-300">
+                Loading...
+              </div>
+            ) : suggestions.length > 0 ? (
               <div className="max-h-64 overflow-y-auto">
                 {suggestions.map((suggestion, index) => (
                   <button
@@ -419,14 +434,12 @@ const Navbar = () => {
                   </button>
                 ))}
               </div>
-            )}
-
-            {/* No results */}
-            {searchQuery && suggestions.length === 0 && (
+            ) : searchQuery && (
               <div className="p-4 text-center text-gray-500 animate-in fade-in duration-300">
                 No results found for "{searchQuery}"
               </div>
             )}
+
 
             {/* Popular searches or recent searches when no query */}
             {!searchQuery && (
