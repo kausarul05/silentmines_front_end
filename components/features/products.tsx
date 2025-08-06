@@ -76,3 +76,21 @@ export const updateProduct = async (id: string, product: FormData) => {
         throw error;
     }
 };
+
+export const deleteProduct = async (id: string) => {
+    try {
+        const response = await fetch(`http://localhost:5000/api/products/${id}`, {
+            method: "DELETE",
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to delete product");
+        }
+
+        const resData = await response.json();
+        return resData;
+    } catch (error) {
+        console.error("Error deleting product:", error);
+        throw error;
+    }
+}

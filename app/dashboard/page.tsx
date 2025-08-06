@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,7 @@ import Header from '@/components/dashboard/header/header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AllProducts from '@/components/dashboard/allProducts/allProducts';
 import { addProduct } from '@/components/features/products';
+import { toast } from 'sonner';
 
 interface AddProduct {
     name: string;
@@ -38,6 +39,8 @@ const AddProductForm = () => {
     const [priceOptions, setPriceOptions] = useState<{ price: string; unit: string }[]>([]);
     const [photoUrls, setPhotoUrls] = useState<File[]>([]);
     const [videoUrls, setVideoUrls] = useState<File[]>([]);
+    const photoInputRef = useRef<HTMLInputElement>(null);
+    const videoInputRef = useRef<HTMLInputElement>(null);
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
@@ -64,13 +67,23 @@ const AddProductForm = () => {
 
         try {
             const res = await addProduct(formData);
-
-            const data = await res.json();
-            console.log("data", data)
-            if (res.ok) {
-                console.log("Product created successfully:", data);
+            console.log("res", res)
+            if (res._id) {
+                setName('');
+                setDescription('');
+                setCategory('');
+                setType('');
+                setPriceOptions([]);
+                setPhotoUrls([]);
+                setVideoUrls([]);
+                // Reset file inputs
+                if (photoInputRef.current) photoInputRef.current.value = '';
+                if (videoInputRef.current) videoInputRef.current.value = '';
+                // success toast
+                toast.success("Product added successfully!");
             } else {
-                console.error("Error:", data.error);
+                console.error("Error:", res.error);
+                toast.error("Failed to add product. Please try again.");
             }
         } catch (err) {
             console.error("❌ Submit error:", err);
@@ -146,7 +159,7 @@ const AddProductForm = () => {
                         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-4">
                             <div className="flex-1">
                                 <Label>Category</Label>
-                                <Select onValueChange={setCategory}>
+                                <Select value={category} onValueChange={setCategory}>
                                     <SelectTrigger className="bg-[#1a2a1a] mt-3 w-full text-white">
                                         <SelectValue placeholder="Select Category" />
                                     </SelectTrigger>
@@ -167,7 +180,7 @@ const AddProductForm = () => {
 
                             <div className="flex-1">
                                 <Label>Type (optional)</Label>
-                                <Select onValueChange={setType}>
+                                <Select value={type} onValueChange={setType}>
                                     <SelectTrigger className="bg-[#1a2a1a] mt-3 w-full text-white">
                                         <SelectValue placeholder="e.g. jar, packwood" />
                                     </SelectTrigger>
@@ -250,6 +263,7 @@ const AddProductForm = () => {
                             <div className="flex-1">
                                 <Label>Upload photoUrls</Label>
                                 <Input
+                                    ref={photoInputRef}
                                     className='bg-[#1a2a1a] mt-3'
                                     type="file"
                                     accept="image/*"
@@ -277,6 +291,7 @@ const AddProductForm = () => {
                             <div className="flex-1">
                                 <Label>Upload videoUrls</Label>
                                 <Input
+                                    ref={videoInputRef}
                                     className='bg-[#1a2a1a] mt-3'
                                     type="file"
                                     accept="video/*"

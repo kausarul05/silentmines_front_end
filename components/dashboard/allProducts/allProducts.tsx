@@ -12,7 +12,7 @@ import { Select } from "@radix-ui/react-select";
 import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Product } from "@/app/(home)/_components/DealOfTheWeek";
-import { getAllProducts, updateProduct } from "@/components/features/products";
+import { deleteProduct, getAllProducts, updateProduct } from "@/components/features/products";
 
 
 const AllProducts = () => {
@@ -79,9 +79,11 @@ const AllProducts = () => {
         setEditModal(true);
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
+        const response = await deleteProduct(selectedProduct.id);
         setProducts(products.filter((p: any) => p.id !== selectedProduct.id));
         setDeleteModal(false);
+        // console.log(response)
     };
 
     return (

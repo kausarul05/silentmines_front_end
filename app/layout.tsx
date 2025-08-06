@@ -37,8 +37,6 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${planetCosmos.variable} antialiased`}
-
-      
       >
         {children}
       </body>
