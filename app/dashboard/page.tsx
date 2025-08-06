@@ -39,40 +39,6 @@ const AddProductForm = () => {
     const [photoUrls, setPhotoUrls] = useState<File[]>([]);
     const [videoUrls, setVideoUrls] = useState<File[]>([]);
 
-    // const handleSubmit = async (e: React.FormEvent) => {
-    //     e.preventDefault();
-    //     // console.log({
-    //     //     name,
-    //     //     description,
-    //     //     category,
-    //     //     type,
-    //     //     priceOptions,
-    //     //     photoUrls,
-    //     //     videoUrls,
-    //     // });
-
-    //     const product = {
-    //         name,
-    //         description,
-    //         category,
-    //         type,
-    //         priceOptions: JSON.stringify(priceOptions.map(item => ({
-    //             unit: item.unit,
-    //             price: Number(item.price),
-    //         }))),
-    //         photoUrls: ["https://dummyimage.com/600x400/000/fff"],
-    //         videoUrls: ["https://dummyimage.com/600x400/000/fff"],
-    //     };
-    //     console.log(product)
-    //     try {
-    //         const productsData = await addProduct(product);
-    //         console.log("Product added successfully:", productsData);
-    //     } catch (error) {
-    //         console.error("Error creating products:", error);
-    //     }
-
-    // };
-
     const handleSubmit = async (e: any) => {
         e.preventDefault();
 

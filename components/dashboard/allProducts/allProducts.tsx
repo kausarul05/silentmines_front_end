@@ -12,63 +12,7 @@ import { Select } from "@radix-ui/react-select";
 import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Product } from "@/app/(home)/_components/DealOfTheWeek";
-import { getAllProducts } from "@/components/features/products";
-
-// const defaultProducts = [
-//     {
-//         id: 1,
-//         image: "/Product_Demo_Image.png",
-//         discount: 75,
-//         category: "flower", // from SelectItem
-//         subcategory: "jar", // from SelectItem
-//         name: "LEMON BUBBLEGUM 🍋⚡",
-//         prices: [
-//             { weight: "1 LB", amount: "750" },
-//             { weight: "2 LB", amount: "750" },
-//             { weight: "3 LB", amount: "750" }
-//         ]
-//     },
-//     {
-//         id: 2,
-//         image: "/Product_Demo_Image.png",
-//         discount: 75,
-//         category: "tier-1-(EXOTIC)", // from SelectItem
-//         subcategory: "packwood", // from SelectItem
-//         name: "CHERRY 7UP 🍒🥤",
-//         prices: [
-//             { weight: "1 LB", amount: "750" },
-//             { weight: "2 LB", amount: "750" },
-//             { weight: "3 LB", amount: "750" }
-//         ]
-//     },
-//     {
-//         id: 3,
-//         image: "/Product_Demo_Image.png",
-//         discount: 75,
-//         category: "tier-2-(TOP-SHELF)", // from SelectItem
-//         subcategory: "sluggers", // from SelectItem
-//         name: "CALIFORNIA DREAM 🌟🌊",
-//         prices: [
-//             { weight: "1 LB", amount: "750" },
-//             { weight: "2 LB", amount: "750" },
-//             { weight: "3 LB", amount: "750" }
-//         ]
-//     },
-//     {
-//         id: 4,
-//         image: "/Product_Demo_Image.png",
-//         discount: 75,
-//         category: "tier-3-(CHEAP)", // from SelectItem
-//         subcategory: "shatter", // from SelectItem
-//         name: "CAKE POPZ 🧁🎉",
-//         prices: [
-//             { weight: "1 LB", amount: "750" },
-//             { weight: "2 LB", amount: "750" },
-//             { weight: "3 LB", amount: "750" }
-//         ]
-//     }
-// ];
-
+import { getAllProducts, updateProduct } from "@/components/features/products";
 
 
 const AllProducts = () => {
@@ -94,6 +38,25 @@ const AllProducts = () => {
         fetchProducts();
     }, []);
 
+    const handleUpdateProduct = async (product: any) => {
+        console.log("Updating product:", product.subcategory);
+
+        const formData = new FormData();
+
+        formData.append("name", product.name.trim());
+        formData.append("description", product.description.trim());
+        formData.append("category", product.category.trim());
+        formData.append("type", product.subcategory.trim());
+        formData.append("priceOptions", JSON.stringify(product.prices.map((item : any) => ({
+            unit: item.weight,
+            price: Number(item.amount),
+        }))));
+
+        await updateProduct(product.id, formData);
+        // console.log(resData)
+    };
+
+
     const handleDelete = (product: any) => {
         setSelectedProduct(product);
         setDeleteModal(true);
@@ -111,6 +74,7 @@ const AllProducts = () => {
     };
 
     const handleEdit = (product: any) => {
+        console.log(product)
         setSelectedProduct(product);
         setEditModal(true);
     };
@@ -179,7 +143,8 @@ const AllProducts = () => {
 
                             <div>
                                 <Label>Category</Label>
-                                <Select>
+                                <Select value={selectedProduct.category ?? ""}
+                                    onValueChange={(value) => setSelectedProduct({ ...selectedProduct, category: value })}>
                                     <SelectTrigger className="bg-[#1a1a1a] mt-3 w-full text-white">
                                         <SelectValue placeholder="Select Category" />
                                     </SelectTrigger>
@@ -200,7 +165,8 @@ const AllProducts = () => {
 
                             <div className="flex-1">
                                 <Label>Type (optional)</Label>
-                                <Select>
+                                <Select value={selectedProduct.subcategory ?? ""}
+                                    onValueChange={(value) => setSelectedProduct({ ...selectedProduct, subcategory: value })}>
                                     <SelectTrigger className="bg-[#1a1a1a] mt-3 w-full text-white">
                                         <SelectValue placeholder="e.g. jar, packwood" />
                                     </SelectTrigger>
@@ -291,6 +257,7 @@ const AllProducts = () => {
                                 <Button
                                     className="bg-green-600 hover:bg-green-700 text-white"
                                     type="submit"
+                                    onClick={() => handleUpdateProduct(selectedProduct)}
                                 >
                                     Save
                                 </Button>
