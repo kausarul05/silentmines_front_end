@@ -73,7 +73,7 @@ const AddProductForm = () => {
 
     // };
 
-    const handleSubmit = async (e : any) => {
+    const handleSubmit = async (e: any) => {
         e.preventDefault();
 
         const formData = new FormData();
@@ -97,13 +97,10 @@ const AddProductForm = () => {
         });
 
         try {
-            const res = await fetch("http://localhost:5000/api/products", {
-                method: "POST",
-                body: JSON.stringify({formData}),
-            });
+            const res = await addProduct(formData);
 
             const data = await res.json();
-
+            console.log("data", data)
             if (res.ok) {
                 console.log("Product created successfully:", data);
             } else {
@@ -113,6 +110,7 @@ const AddProductForm = () => {
             console.error("❌ Submit error:", err);
         }
     };
+
 
     const handleAddPriceUnit = () => {
         if (!priceInput || !unitInput) return;
