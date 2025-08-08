@@ -103,6 +103,36 @@ export const getProductbyCategory = async (category: string, page: number) => {
     }
 }
 
+export const getAnnouncements = async () => {
+    try {
+        const response = await fetch("http://localhost:5000/api/announcements")
+        const resData = await response.json();
+        return resData;
+    } catch (error) {
+        console.error("Failed to fetch Announcements:", error);
+        throw error;
+    }
+}
+export const updateAnnouncements = async (content: any) => {
+    try {
+        const response = await fetch("http://localhost:5000/api/announcements", { // change to your actual API URL
+            method: "PUT", // or POST if creating new
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                announcement: content,
+            }),
+        });
+
+        const resData = await response.json();
+        return resData;
+    } catch (error) {
+        console.error("Error updateAnnouncements:", error);
+        throw error;
+    }
+}
+
 export const addProduct = async (product: any) => {
     try {
         const response = await fetch("http://localhost:5000/api/products", {
