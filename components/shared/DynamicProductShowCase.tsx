@@ -4,7 +4,8 @@ import { Product } from '@/app/(home)/_components/DealOfTheWeek';
 import Pagination from '@/components/shared/pagination';
 import ProductCard from '@/components/shared/productCard';
 import { usePathname } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { getProductbyCategory } from '../features/products';
 
 
 interface DynamicProductShowCaseProps {
@@ -13,25 +14,26 @@ interface DynamicProductShowCaseProps {
     description: string;
 }
 
-
-
 // Main Gallery Component
 const DynamicProductShowCase: React.FC<DynamicProductShowCaseProps> = ({
-    mockProducts,
+    // mockProducts,
     title = "Full Gallery",
     description = "Discover our complete collection of premium products. Browse through our carefully curated items."
 
 }) => {
-
-    const path = usePathname();
-    const pathName = path.startsWith('/') ? path.slice(1) : path; 
-
-    console.log("Path:", pathName);
-
+    const [mockProducts, setMockProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(12);
+    const path = usePathname();
 
+    // "/flowers/tier-3-(CHEAP)" → "tier-3-(CHEAP)"
+    const pathName = path
+        .replace(/^\/flowers\//, "") 
+        .replace(/^\//, ""); 
 
+    useEffect(() => {
+        fetchProductsByCategory()
+    }, [pathName])
 
     // Calculate pagination
     const totalPages = Math.ceil(mockProducts.length / itemsPerPage);
@@ -44,6 +46,17 @@ const DynamicProductShowCase: React.FC<DynamicProductShowCaseProps> = ({
         setItemsPerPage(newItemsPerPage);
         setCurrentPage(1);
     };
+
+    const fetchProductsByCategory = async () => {
+        try {
+            const response = await getProductbyCategory(pathName, currentPage);
+            setMockProducts(response);
+        } catch (error) {
+            console.error("fetch Product error", error);
+        }
+    };
+
+
 
     return (
         <div className="min-h-screen bg-black/60 backdrop-blur-[1px]">
@@ -93,67 +106,73 @@ const DynamicProductShowCase: React.FC<DynamicProductShowCaseProps> = ({
             </div>
 
             {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Controls Bar */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 bg-gray-900/80 backdrop-blur-sm border border-gray-700 p-4 rounded-lg shadow-lg">
-                    <div className="flex items-center space-x-4">
-                        <span className="text-sm font-medium text-gray-300">
-                            Showing {startIndex + 1}-{Math.min(endIndex, mockProducts.length)} of {mockProducts.length} products
-                        </span>
-                    </div>
+            {mockProducts.length > 0 ? (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    {/* Header with controls */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 bg-gray-900/80 backdrop-blur-sm border border-gray-700 p-4 rounded-lg shadow-lg">
+                        <div className="flex items-center space-x-4">
+                            <span className="text-sm font-medium text-gray-300">
+                                Showing {startIndex + 1}-{Math.min(endIndex, mockProducts.length)} of {mockProducts.length} products
+                            </span>
+                        </div>
 
-                    <div className="flex items-center space-x-4">
-
-                        <div className="flex items-center space-x-2">
-                            <label htmlFor="perPage" className="text-sm font-medium text-gray-300">
-                                Show:
-                            </label>
-                            <select
-                                id="perPage"
-                                value={itemsPerPage}
-                                onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                                className="bg-gray-800 border border-gray-600 text-white rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            >
-                                <option value={8}>8 per page</option>
-                                <option value={12}>12 per page</option>
-                                <option value={24}>24 per page</option>
-                                <option value={48}>48 per page</option>
-                            </select>
+                        <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-2">
+                                <label htmlFor="perPage" className="text-sm font-medium text-gray-300">
+                                    Show:
+                                </label>
+                                <select
+                                    id="perPage"
+                                    value={itemsPerPage}
+                                    onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                                    className="bg-gray-800 border border-gray-600 text-white rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                >
+                                    <option value={8}>8 per page</option>
+                                    <option value={12}>12 per page</option>
+                                    <option value={24}>24 per page</option>
+                                    <option value={48}>48 per page</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Product Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                    {currentProducts.map((product) => (
-                        <ProductCard
-                            key={product.id}
-                            image={product.image}
-                            discount={product.discount}
-                            category={product.category}
-                            subcategory={product.subcategory}
-                            name={product.name}
-                            prices={product.prices}
+                    {/* Product Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                        {currentProducts.map((product) => (
+                            <ProductCard
+                                key={product.id}
+                                image={product.image}
+                                discount={product.discount}
+                                category={product.category}
+                                subcategory={product.subcategory}
+                                name={product.name}
+                                prices={product.prices}
+                            />
+                        ))}
+                    </div>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={setCurrentPage}
                         />
-                    ))}
-                </div>
+                    )}
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={setCurrentPage}
-                    />
-                )}
-
-                {/* Results Summary */}
-                <div className="text-center mt-8 p-4 bg-gray-900/80 backdrop-blur-sm border border-gray-700 rounded-lg shadow-lg">
-                    <p className="text-sm text-gray-300">
-                        Page {currentPage} of {totalPages} • Showing {currentProducts.length} products
-                    </p>
+                    {/* Results Summary */}
+                    <div className="text-center mt-8 p-4 bg-gray-900/80 backdrop-blur-sm border border-gray-700 rounded-lg shadow-lg">
+                        <p className="text-sm text-gray-300">
+                            Page {currentPage} of {totalPages} • Showing {currentProducts.length} products
+                        </p>
+                    </div>
                 </div>
-            </div>
+            ) : (
+                <p className="text-lg text-gray-300 text-center mt-5">
+                    No products available in this category.
+                </p>
+            )}
+
 
             <div className='mt-20'>
                 <video autoPlay loop muted className="w-screen h-80 object-cover ">

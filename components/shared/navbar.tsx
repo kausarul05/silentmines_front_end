@@ -45,9 +45,9 @@ const Navbar = () => {
     { name: 'Gallery', href: '/gallery' },
     {
       name: 'Flowers', href: '/flowers', sub: [
-        { name: 'Tier 1 (EXOTIC)', href: '/flowers/tier1' },
-        { name: 'Tier 2 (TOP SHELF)', href: '/flowers/tier2' },
-        { name: 'Tier 3 (CHEAP)', href: '/flowers/tier3' },
+        { name: 'Tier 1 (EXOTIC)', href: '/flowers/tier-1-(EXOTIC)' },
+        { name: 'Tier 2 (TOP SHELF)', href: '/flowers/tier-2-(TOP-SHELF)' },
+        { name: 'Tier 3 (CHEAP)', href: '/flowers/tier-3-(CHEAP)' },
         { name: 'Snowcaps', href: '/flowers/snowcaps' },
         { name: 'Moonrocks', href: '/flowers/moonrocks' },
       ]
