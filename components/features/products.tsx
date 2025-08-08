@@ -36,7 +36,7 @@ export const getAllProducts = async () => {
     }
 };
 
-export const getProductBySearch = async (searchTerm: string, page : number) => {
+export const getProductBySearch = async (searchTerm: string, page: number) => {
     try {
         const response = await fetch(`http://localhost:5000/api/products/search?search=${searchTerm}&page=${page}`, {
             method: "GET",
@@ -44,6 +44,37 @@ export const getProductBySearch = async (searchTerm: string, page : number) => {
                 "Content-Type": "application/json",
             },
         });
+
+        const resData = await response.json();
+
+        const formattedProducts: Product[] = resData.data.map((item: any) => ({
+            id: item._id,
+            image: item.photoUrls[0],
+            discount: Math.floor(Math.random() * 80) + 10, // after send backend discount data then show like item.discount
+            category: item.category,
+            description: item.description,
+            subcategory: item.type,
+            name: item.name,
+            prices: item.priceOptions.length > 0
+                ? item.priceOptions.map((option: any) => ({
+                    weight: option.unit,
+                    amount: option.price.toString()
+                }))
+                : [],
+            photoUrls: item.photoUrls.map((url: string) => url),
+            videoUrls: item.videoUrls.map((url: string) => url),
+        }));
+
+        return formattedProducts;
+    } catch (error) {
+        console.error("Failed to fetch products by search:", error);
+        throw error;
+    }
+}
+
+export const getProductbyCategory = async (category: string, page: number) => {
+    try {
+        const response = await fetch(`http://localhost:5000/api/products/category/${category}?page=${page}`)
 
         const resData = await response.json();
 

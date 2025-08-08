@@ -84,6 +84,7 @@ const Navbar = () => {
     return item.sub.some(subItem => pathname === subItem.href);
   };
 
+
   const handleDropdownEnter = (itemName: string) => {
     if (dropdownTimeoutRef.current) {
       clearTimeout(dropdownTimeoutRef.current);
@@ -97,6 +98,7 @@ const Navbar = () => {
     }, 150);
   };
 
+  // Fetch search suggestions based on user input
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (searchQuery.trim() === '') {

@@ -3,6 +3,7 @@
 import { Product } from '@/app/(home)/_components/DealOfTheWeek';
 import Pagination from '@/components/shared/pagination';
 import ProductCard from '@/components/shared/productCard';
+import { usePathname } from 'next/navigation';
 import React, { useState } from 'react';
 
 
@@ -21,6 +22,12 @@ const DynamicProductShowCase: React.FC<DynamicProductShowCaseProps> = ({
     description = "Discover our complete collection of premium products. Browse through our carefully curated items."
 
 }) => {
+
+    const path = usePathname();
+    const pathName = path.startsWith('/') ? path.slice(1) : path; 
+
+    console.log("Path:", pathName);
+
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(12);
 
@@ -149,7 +156,7 @@ const DynamicProductShowCase: React.FC<DynamicProductShowCaseProps> = ({
             </div>
 
             <div className='mt-20'>
-                <video  autoPlay loop muted className="w-screen h-80 object-cover ">
+                <video autoPlay loop muted className="w-screen h-80 object-cover ">
                     <source src="/original.mov" type="video/mp4" />
                     Your browser does not support the video tag.
                 </video>
