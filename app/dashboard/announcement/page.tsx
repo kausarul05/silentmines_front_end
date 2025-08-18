@@ -24,7 +24,7 @@ const Announcement = () => {
                 color: "#fff",
                 height: "370px",
             },
-        }),
+        }), 
         []
     );
 
